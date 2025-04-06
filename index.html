@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AssistBot</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background-color: #dcdcdc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Banner für Wartungsarbeiten */
+    .maintenance-banner {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #dcdcdc;
+      color: #606060;
+      padding: 10px 20px;
+      font-size: 30px;
+      font-weight: bold;
+      border-radius: 5px;
+      z-index: 200;
+      font-family: Charcoal, sans-serif;
+    }
+
+    /* Refresh Button oben links */
+    .button {
+      --main-focus: #2d8cf0;
+      --font-color: #323232;
+      --bg-color-sub: #7785cc;
+      --bg-color: #ffffff;
+      --main-color: #dcdcdc;
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 150px;
+      height: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border: 2px solid var(--main-color);
+      box-shadow: 4px 4px var(--main-color);
+      background-color: var(--bg-color);
+      border-radius: 10px;
+      overflow: hidden;
+      z-index: 100;
+    }
+
+    .button, .button__icon, .button__text {
+      transition: all 0.3s;
+    }
+
+    .button .button__text {
+      transform: translateX(30px);
+      color: var(--font-color);
+      font-weight: 600;
+    }
+
+    .button .button__icon {
+      position: absolute;
+      transform: translateX(109px);
+      height: 100%;
+      width: 39px;
+      background-color: var(--bg-color-sub);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .button .svg {
+      width: 20px;
+      fill: var(--main-color);
+    }
+
+    .button:hover {
+      background: var(--bg-color);
+    }
+
+    .button:hover .button__text {
+      color: transparent;
+    }
+
+    .button:hover .button__icon {
+      width: 148px;
+      transform: translateX(0);
+    }
+
+    .button:active {
+      transform: translate(3px, 3px);
+      box-shadow: 0px 0px var(--main-color);
+    }
+
+    /* WiFi Loader Style */
+    #wifi-loader {
+      --background: #62abff;
+      --front-color: #7785cc;
+      --back-color: #606060;
+      --text-color: rgb(96, 96, 96);
+      width: 64px;
+      height: 64px;
+      border-radius: 50px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #wifi-loader svg {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #wifi-loader svg circle {
+      position: absolute;
+      fill: none;
+      stroke-width: 6px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transform: rotate(-100deg);
+      transform-origin: center;
+    }
+
+    #wifi-loader svg circle.back {
+      stroke: var(--back-color);
+    }
+
+    #wifi-loader svg circle.front {
+      stroke: var(--front-color);
+    }
+
+    #wifi-loader svg.circle-outer {
+      height: 86px;
+      width: 86px;
+    }
+
+    #wifi-loader svg.circle-outer circle {
+      stroke-dasharray: 62.75 188.25;
+    }
+
+    #wifi-loader svg.circle-outer circle.back {
+      animation: circle-outer135 1.8s ease infinite 0.3s;
+    }
+
+    #wifi-loader svg.circle-outer circle.front {
+      animation: circle-outer135 1.8s ease infinite 0.15s;
+    }
+
+    #wifi-loader svg.circle-middle {
+      height: 60px;
+      width: 60px;
+    }
+
+    #wifi-loader svg.circle-middle circle {
+      stroke-dasharray: 42.5 127.5;
+    }
+
+    #wifi-loader svg.circle-middle circle.back {
+      animation: circle-middle6123 1.8s ease infinite 0.25s;
+    }
+
+    #wifi-loader svg.circle-middle circle.front {
+      animation: circle-middle6123 1.8s ease infinite 0.1s;
+    }
+
+    #wifi-loader svg.circle-inner {
+      height: 34px;
+      width: 34px;
+    }
+
+    #wifi-loader svg.circle-inner circle {
+      stroke-dasharray: 22 66;
+    }
+
+    #wifi-loader svg.circle-inner circle.back {
+      animation: circle-inner162 1.8s ease infinite 0.2s;
+    }
+
+    #wifi-loader svg.circle-inner circle.front {
+      animation: circle-inner162 1.8s ease infinite 0.05s;
+    }
+
+    #wifi-loader .text {
+      position: absolute;
+      bottom: -40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-transform: lowercase;
+      font-weight: 500;
+      font-size: 21px;
+      letter-spacing: 0.2px;
+      font-family: Charcoal, sans-serif;
+    }
+
+    #wifi-loader .text::before,
+    #wifi-loader .text::after {
+      content: attr(data-text);
+    }
+
+    #wifi-loader .text::before {
+      color: var(--text-color);
+    }
+
+    #wifi-loader .text::after {
+      color: var(--front-color);
+      animation: text-animation76 3.6s ease infinite;
+      position: absolute;
+      left: 0;
+    }
+
+    @keyframes circle-outer135 {
+      0% { stroke-dashoffset: 25; }
+      25% { stroke-dashoffset: 0; }
+      65% { stroke-dashoffset: 301; }
+      80% { stroke-dashoffset: 276; }
+      100% { stroke-dashoffset: 276; }
+    }
+
+    @keyframes circle-middle6123 {
+      0% { stroke-dashoffset: 17; }
+      25% { stroke-dashoffset: 0; }
+      65% { stroke-dashoffset: 204; }
+      80% { stroke-dashoffset: 187; }
+      100% { stroke-dashoffset: 187; }
+    }
+
+    @keyframes circle-inner162 {
+      0% { stroke-dashoffset: 9; }
+      25% { stroke-dashoffset: 0; }
+      65% { stroke-dashoffset: 106; }
+      80% { stroke-dashoffset: 97; }
+      100% { stroke-dashoffset: 97; }
+    }
+
+    @keyframes text-animation76 {
+      0% { clip-path: inset(0 100% 0 0); }
+      50% { clip-path: inset(0); }
+      100% { clip-path: inset(0 0 0 100%); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Wartungsarbeiten Banner -->
+<div class="maintenance-banner">Wartungsarbeiten</div>
+
+<!-- Refresh-Button -->
+<button type="button" class="button" onclick="location.reload();">
+  <span class="button__text">Refresh</span>
+  <span class="button__icon">
+      <svg class="svg" height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg">
+        <path d="M35.3 12.7c-2.89-2.9-6.88-4.7-11.3-4.7-8.84 0-15.98 7.16-15.98 16s7.14 16 15.98 16c7.45 0 13.69-5.1 15.46-12h-4.16c-1.65 4.66-6.07 8-11.3 8-6.63 0-12-5.37-12-12s5.37-12 12-12c3.31 0 6.28 1.38 8.45 3.55l-6.45 6.45h14v-14l-4.7 4.7z"></path>
+        <path d="M0 0h48v48h-48z" fill="none"></path>
+      </svg>
+    </span>
+</button>
+
+<!-- WiFi Loader -->
+<div id="wifi-loader">
+  <svg class="circle-outer" viewBox="0 0 86 86">
+    <circle class="back" cx="43" cy="43" r="40"></circle>
+    <circle class="front" cx="43" cy="43" r="40"></circle>
+    <circle class="new" cx="43" cy="43" r="40"></circle>
+  </svg>
+  <svg class="circle-middle" viewBox="0 0 60 60">
+    <circle class="back" cx="30" cy="30" r="27"></circle>
+    <circle class="front" cx="30" cy="30" r="27"></circle>
+  </svg>
+  <svg class="circle-inner" viewBox="0 0 34 34">
+    <circle class="back" cx="17" cy="17" r="14"></circle>
+    <circle class="front" cx="17" cy="17" r="14"></circle>
+  </svg>
+  <div class="text" data-text="soon"></div>
+</div>
+
+</body>
+</html>
