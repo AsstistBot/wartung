@@ -1,288 +1,380 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AssistBot</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      background-color: #dcdcdc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Standard-Cursor und Handzeiger */
+        a, button {
+            cursor: pointer;
+        }
+        body {
+            cursor: default;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
 
-    /* Banner für Wartungsarbeiten */
-    .maintenance-banner {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #dcdcdc;
-      color: #606060;
-      padding: 10px 20px;
-      font-size: 30px;
-      font-weight: bold;
-      border-radius: 5px;
-      z-index: 200;
-      font-family: Charcoal, sans-serif;
-    }
+        /* Dark Mode Styles */
+        body.dark {
+            background-color: #1a1a1a;
+            color: #e5e7eb;
+        }
+        body.dark header {
+            background-color: #2d2d2d;
+        }
+        body.dark header h1 {
+            color: #e5e7eb;
+        }
+        body.dark header a {
+            color: #9ca3af;
+        }
+        body.dark header a:hover {
+            color: #60a5fa;
+        }
+        body.dark #products {
+            background-color: #1a1a1a;
+        }
+        body.dark .product-card {
+            background-color: #2d2d2d;
+            color: #e5e7eb;
+        }
+        body.dark .product-card p {
+            color: #9ca3af;
+        }
+        body.dark #discord-support {
+            background-color: #1a1a1a;
+        }
+        body.dark #discord-support p {
+            color: #9ca3af;
+        }
+        body.dark footer {
+            background-color: #111111;
+        }
 
-    /* Refresh Button oben links */
-    .button {
-      --main-focus: #2d8cf0;
-      --font-color: #323232;
-      --bg-color-sub: #7785cc;
-      --bg-color: #ffffff;
-      --main-color: #dcdcdc;
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      width: 150px;
-      height: 40px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      border: 2px solid var(--main-color);
-      box-shadow: 4px 4px var(--main-color);
-      background-color: var(--bg-color);
-      border-radius: 10px;
-      overflow: hidden;
-      z-index: 100;
-    }
+        /* Home Section Bild */
+        #home {
+            background: url('https://cdn.discordapp.com/attachments/1314994077896409111/1363772579697131612/web.gif?ex=68073fb0&is=6805ee30&hm=cace0e935d0ebc594758f5325faaac6c4e7f0a5c70c4c18d8bb1c3fcfa3518ca&') no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+        #home::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        #home .container {
+            position: relative;
+            z-index: 1;
+        }
 
-    .button, .button__icon, .button__text {
-      transition: all 0.3s;
-    }
+        /* Pop-up Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        .popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .popup-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            padding: 1.5rem;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        body.dark .popup-content {
+            background: #2d2d2d;
+            color: #e5e7eb;
+        }
+        body.dark .popup-content p {
+            color: #9ca3af;
+        }
+        .popup-content.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            color: #4b5563;
+            transition: color 0.3s ease;
+        }
+        body.dark .popup-close {
+            color: #9ca3af;
+        }
+        .popup-close:hover {
+            color: #1e3a8a;
+        }
+        body.dark .popup-close:hover {
+            color: #60a5fa;
+        }
 
-    .button .button__text {
-      transform: translateX(30px);
-      color: var(--font-color);
-      font-weight: 600;
-    }
+        /* Animationen */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 0.8s ease forwards;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .scale-in {
+            transform: scale(0.95);
+            opacity: 0;
+            animation: scaleIn 0.6s ease forwards;
+        }
+        @keyframes scaleIn {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .card-hover {
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+        }
 
-    .button .button__icon {
-      position: absolute;
-      transform: translateX(109px);
-      height: 100%;
-      width: 39px;
-      background-color: var(--bg-color-sub);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
 
-    .button .svg {
-      width: 20px;
-      fill: var(--main-color);
-    }
+        /* Button Animation */
+        .btn-hover {
+            transition: transform 0.2s ease;
+        }
+        .btn-hover:hover {
+            transform: scale(1.05);
+        }
 
-    .button:hover {
-      background: var(--bg-color);
-    }
-
-    .button:hover .button__text {
-      color: transparent;
-    }
-
-    .button:hover .button__icon {
-      width: 148px;
-      transform: translateX(0);
-    }
-
-    .button:active {
-      transform: translate(3px, 3px);
-      box-shadow: 0px 0px var(--main-color);
-    }
-
-    /* WiFi Loader Style */
-    #wifi-loader {
-      --background: #62abff;
-      --front-color: #7785cc;
-      --back-color: #606060;
-      --text-color: rgb(96, 96, 96);
-      width: 64px;
-      height: 64px;
-      border-radius: 50px;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #wifi-loader svg {
-      position: absolute;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #wifi-loader svg circle {
-      position: absolute;
-      fill: none;
-      stroke-width: 6px;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      transform: rotate(-100deg);
-      transform-origin: center;
-    }
-
-    #wifi-loader svg circle.back {
-      stroke: var(--back-color);
-    }
-
-    #wifi-loader svg circle.front {
-      stroke: var(--front-color);
-    }
-
-    #wifi-loader svg.circle-outer {
-      height: 86px;
-      width: 86px;
-    }
-
-    #wifi-loader svg.circle-outer circle {
-      stroke-dasharray: 62.75 188.25;
-    }
-
-    #wifi-loader svg.circle-outer circle.back {
-      animation: circle-outer135 1.8s ease infinite 0.3s;
-    }
-
-    #wifi-loader svg.circle-outer circle.front {
-      animation: circle-outer135 1.8s ease infinite 0.15s;
-    }
-
-    #wifi-loader svg.circle-middle {
-      height: 60px;
-      width: 60px;
-    }
-
-    #wifi-loader svg.circle-middle circle {
-      stroke-dasharray: 42.5 127.5;
-    }
-
-    #wifi-loader svg.circle-middle circle.back {
-      animation: circle-middle6123 1.8s ease infinite 0.25s;
-    }
-
-    #wifi-loader svg.circle-middle circle.front {
-      animation: circle-middle6123 1.8s ease infinite 0.1s;
-    }
-
-    #wifi-loader svg.circle-inner {
-      height: 34px;
-      width: 34px;
-    }
-
-    #wifi-loader svg.circle-inner circle {
-      stroke-dasharray: 22 66;
-    }
-
-    #wifi-loader svg.circle-inner circle.back {
-      animation: circle-inner162 1.8s ease infinite 0.2s;
-    }
-
-    #wifi-loader svg.circle-inner circle.front {
-      animation: circle-inner162 1.8s ease infinite 0.05s;
-    }
-
-    #wifi-loader .text {
-      position: absolute;
-      bottom: -40px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-transform: lowercase;
-      font-weight: 500;
-      font-size: 21px;
-      letter-spacing: 0.2px;
-      font-family: Charcoal, sans-serif;
-    }
-
-    #wifi-loader .text::before,
-    #wifi-loader .text::after {
-      content: attr(data-text);
-    }
-
-    #wifi-loader .text::before {
-      color: var(--text-color);
-    }
-
-    #wifi-loader .text::after {
-      color: var(--front-color);
-      animation: text-animation76 3.6s ease infinite;
-      position: absolute;
-      left: 0;
-    }
-
-    @keyframes circle-outer135 {
-      0% { stroke-dashoffset: 25; }
-      25% { stroke-dashoffset: 0; }
-      65% { stroke-dashoffset: 301; }
-      80% { stroke-dashoffset: 276; }
-      100% { stroke-dashoffset: 276; }
-    }
-
-    @keyframes circle-middle6123 {
-      0% { stroke-dashoffset: 17; }
-      25% { stroke-dashoffset: 0; }
-      65% { stroke-dashoffset: 204; }
-      80% { stroke-dashoffset: 187; }
-      100% { stroke-dashoffset: 187; }
-    }
-
-    @keyframes circle-inner162 {
-      0% { stroke-dashoffset: 9; }
-      25% { stroke-dashoffset: 0; }
-      65% { stroke-dashoffset: 106; }
-      80% { stroke-dashoffset: 97; }
-      100% { stroke-dashoffset: 97; }
-    }
-
-    @keyframes text-animation76 {
-      0% { clip-path: inset(0 100% 0 0); }
-      50% { clip-path: inset(0); }
-      100% { clip-path: inset(0 0 0 100%); }
-    }
-  </style>
+        /* Theme Toggle Button */
+        #themeToggle {
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+        #themeToggle:hover {
+            background-color: #e5e7eb;
+        }
+        body.dark #themeToggle:hover {
+            background-color: #4b5563;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 font-sans">
+<!-- Header -->
+<header class="bg-white shadow-md fixed w-full top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-800">Modern Shop</h1>
+        <nav class="flex items-center space-x-6">
+            <ul class="flex space-x-6">
+                <li><a href="#home" class="text-gray-600 hover:text-blue-500 transition">Home</a></li>
+                <li><a href="#products" class="text-gray-600 hover:text-blue-500 transition">Produkte</a></li>
+                <li><a href="#discord-support" class="text-gray-600 hover:text-blue-500 transition">Support</a></li>
+            </ul>
+            <button id="themeToggle" class="btn-hover">
+                <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </button>
+        </nav>
+    </div>
+</header>
 
-<!-- Wartungsarbeiten Banner -->
-<div class="maintenance-banner">Wartungsarbeiten</div>
+<!-- Hero Section -->
+<section id="home" class="min-h-screen flex items-center justify-center text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-5xl font-bold mb-4 fade-in">Willkommen XavoBag</h2>
+        <p class="text-xl mb-6 fade-in" style="animation-delay: 0.2s;">Entdecke unsere exklusiven Produkte mit Stil und Qualität.</p>
+        <a href="#products" class="inline-block bg-white text-blue-600 px-6 py-3 rounded-full font-semibold btn-hover fade-in" style="animation-delay: 0.4s;">Jetzt einkaufen</a>
+    </div>
+</section>
 
-<!-- Refresh-Button -->
-<button type="button" class="button" onclick="location.reload();">
-  <span class="button__text">Refresh</span>
-  <span class="button__icon">
-      <svg class="svg" height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg">
-        <path d="M35.3 12.7c-2.89-2.9-6.88-4.7-11.3-4.7-8.84 0-15.98 7.16-15.98 16s7.14 16 15.98 16c7.45 0 13.69-5.1 15.46-12h-4.16c-1.65 4.66-6.07 8-11.3 8-6.63 0-12-5.37-12-12s5.37-12 12-12c3.31 0 6.28 1.38 8.45 3.55l-6.45 6.45h14v-14l-4.7 4.7z"></path>
-        <path d="M0 0h48v48h-48z" fill="none"></path>
-      </svg>
-    </span>
-</button>
+<!-- Products Section -->
+<section id="products" class="py-16 bg-gray-100">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-12 fade-in">Unsere Produkte</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Produkt 1 -->
+            <div class="bg-white rounded-lg overflow-hidden card-hover scale-in product-card" onclick="openPopup('Discord Roleplay Server', 'Ein richtig guter Discord-Server für deinen Server – mit Rollen, Bots und allem, was dazugehört!', '€10,00', 'https://media.discordapp.net/attachments/1314994077896409111/1363776420438081557/Roleplay_Discord_Server.png?ex=68074344&is=6805f1c4&hm=b8a87796e9df05df066a51c77b7fec0a48edf4c90b09500ba8f7f2a1636446c3&=&format=webp&quality=lossless')">
+                <img src="https://media.discordapp.net/attachments/1314994077896409111/1363776420438081557/Roleplay_Discord_Server.png?ex=68074344&is=6805f1c4&hm=b8a87796e9df05df066a51c77b7fec0a48edf4c90b09500ba8f7f2a1636446c3&=&format=webp&quality=lossless" alt="Test 1" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">Roleplay Discord Server</h3>
+                    <p class="text-gray-600 mb-4">Ein richtig guter Discord-Server für deinen Server – mit Rollen, Bots und allem, was dazugehört!</p>
+                    <p class="text-lg font-bold text-blue-600 mb-4">€10,00</p>
+                    <a href="https://discord.com/channels/1363222344369307770/1363779185939579020" class="block w-full bg-blue-500 text-white py-2 rounded btn-hover text-center">Zum Produkt</a>
+                </div>
+            </div>
+            <!-- Produkt 2 -->
+            <div class="bg-white rounded-lg overflow-hidden card-hover scale-in product-card" style="animation-delay: 0.2s;" onclick="openPopup('Produkt 2', 'Dein ultimativer Discord-Server für Gang- & Fraktions-RP – mit durchdachten Rollen, smarten Bots und allem, was deine RP-Community braucht!', '€10,00', 'https://cdn.discordapp.com/attachments/1314994077896409111/1363776660096417822/GangFrak_Discord_Server.png?ex=6807437d&is=6805f1fd&hm=994baea81fcfac831f8534ccc6ac21f6b38f3385d05cfddf06f4ad5c801203c8&')">
+                <img src="https://cdn.discordapp.com/attachments/1314994077896409111/1363776660096417822/GangFrak_Discord_Server.png?ex=6807437d&is=6805f1fd&hm=994baea81fcfac831f8534ccc6ac21f6b38f3385d05cfddf06f4ad5c801203c8&" alt="Produkt 2" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">Gang/Frak Discord Server</h3>
+                    <p class="text-gray-600 mb-4">Dein ultimativer Discord-Server für Gang- & Fraktions-RP – mit durchdachten Rollen, smarten Bots und allem, was deine RP-Community braucht! </p>
+                    <p class="text-lg font-bold text-blue-600 mb-4">€10,00</p>
+                    <a href="https://discord.com/channels/1363222344369307770/1363778945937576057" class="block w-full bg-blue-500 text-white py-2 rounded btn-hover text-center">Zum Produkt</a>
+                </div>
+            </div>
+            <!-- Produkt 3 -->
+            <div class="bg-white rounded-lg overflow-hidden card-hover scale-in product-card" style="animation-delay: 0.4s;" onclick="openPopup('Produkt 3', 'Der perfekte Ort für deine Community – mit coolen Rollen, nützlichen Bots & jeder Menge Spaß!', '€15,00', 'https://cdn.discordapp.com/attachments/1314994077896409111/1363778353580212256/Community_Discord_Server.png?ex=68074511&is=6805f391&hm=a368ed695c6a2f29af35536ad3fb04508cc282dfc1a164a44988f1db101be3c8&')">
+                <img src="https://cdn.discordapp.com/attachments/1314994077896409111/1363778353580212256/Community_Discord_Server.png?ex=68074511&is=6805f391&hm=a368ed695c6a2f29af35536ad3fb04508cc282dfc1a164a44988f1db101be3c8&" alt="Produkt 3" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">Community Discord Server</h3>
+                    <p class="text-gray-600 mb-4">Der perfekte Ort für deine Community – mit coolen Rollen, nützlichen Bots & jeder Menge Spaß!</p>
+                    <p class="text-lg font-bold text-blue-600 mb-4">€15,00</p>
+                    <a href="https://discord.com/channels/1363222344369307770/1363779662454591558" class="block w-full bg-blue-500 text-white py-2 rounded btn-hover text-center">Zum Produkt</a>
+                </div>
+            </div>
+            <!-- Produkt 4 -->
+            <div class="bg-white rounded-lg overflow-hidden card-hover scale-in product-card" style="animation-delay: 0.6s;" onclick="openPopup('Produkt 4', 'Dein Profil ist mehr als ein Name – mit dem XavoBag Profil-Banner stichst du stilvoll aus der Masse hervor.', '€5,00', 'https://cdn.discordapp.com/attachments/1363254579826790522/1363254580963442760/profil_banner.png?ex=6806aec4&is=68055d44&hm=0eef78f300590c4a3d89af234cf113a694d243daa8049251dd615ae1a4632f2d&')">
+                <img src="https://cdn.discordapp.com/attachments/1363254579826790522/1363254580963442760/profil_banner.png?ex=6806aec4&is=68055d44&hm=0eef78f300590c4a3d89af234cf113a694d243daa8049251dd615ae1a4632f2d&" alt="Produkt 4" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">Dein Profil Banner</h3>
+                    <p class="text-gray-600 mb-4">Dein Profil ist mehr als ein Name – mit dem XavoBag Profil-Banner stichst du stilvoll aus der Masse hervor.</p>
+                    <p class="text-lg font-bold text-blue-600 mb-4">5,00</p>
+                    <a href="https://discord.com/channels/1363222344369307770/1363254579826790522" class="block w-full bg-blue-500 text-white py-2 rounded btn-hover text-center">Zum Produkt</a>
+                </div>
+            </div>
+            <!-- Produkt 5 -->
+            <div class="bg-white rounded-lg overflow-hidden card-hover scale-in product-card" style="animation-delay: 0.8s;" onclick="openPopup('Produkt 5', 'Beschreibung des Produkts 5. Elegant und vielseitig.', '5,00', 'https://cdn.discordapp.com/attachments/1363251757714772209/1363251758327005184/discord_banner.png?ex=6806ac23&is=68055aa3&hm=49b9250f151ee79bb63f425db3dd8bb39c57e96b89138c4e418f3a9aa7f5b308&')">
+                <img src="https://cdn.discordapp.com/attachments/1363251757714772209/1363251758327005184/discord_banner.png?ex=6806ac23&is=68055aa3&hm=49b9250f151ee79bb63f425db3dd8bb39c57e96b89138c4e418f3a9aa7f5b308&" alt="Produkt 5" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">Dein Discord Banner</h3>
+                    <p class="text-gray-600 mb-4">Verleihe deinem Discord-Profil oder Server einen einzigartigen Look mit dem hochwertigen XavoBag-Banner – für Persönlichkeit, Stil und Wiedererkennung.</p>
+                    <p class="text-lg font-bold text-blue-600 mb-4">5,00</p>
+                    <a href="https://discord.com/channels/1363222344369307770/1363251757714772209" class="block w-full bg-blue-500 text-white py-2 rounded btn-hover text-center">Zum Produkt</a>
+                </div>
+            </div>
+            <!-- Produkt 6 -->
+            <div class="bg-white rounded-lg overflow-hidden card-hover scale-in product-card" style="animation-delay: 1s;" onclick="openPopup('Produkt 6', 'Deine zentrale Webseite für alle wichtigen Infos – übersichtlich und immer aktuell!.', '20,00', 'https://cdn.discordapp.com/attachments/1363782293646479440/1363782294225162333/Webseite_Fur_deine_Infos.png?ex=680748bc&is=6805f73c&hm=54b46c6ebea71fb291c5136866c2def921480cbed325e6f673dc787d54c340ef&')">
+                <img src="https://cdn.discordapp.com/attachments/1363782293646479440/1363782294225162333/Webseite_Fur_deine_Infos.png?ex=680748bc&is=6805f73c&hm=54b46c6ebea71fb291c5136866c2def921480cbed325e6f673dc787d54c340ef&" alt="Produkt 6" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">Webseite Für deine Infos</h3>
+                    <p class="text-gray-600 mb-4">Deine zentrale Webseite für alle wichtigen Infos – übersichtlich und immer aktuell!</p>
+                    <p class="text-lg font-bold text-blue-600 mb-4">20,00</p>
+                    <a href="https://discord.com/channels/1363222344369307770/1363782293646479440" class="block w-full bg-blue-500 text-white py-2 rounded btn-hover text-center">Zum Produkt</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-<!-- WiFi Loader -->
-<div id="wifi-loader">
-  <svg class="circle-outer" viewBox="0 0 86 86">
-    <circle class="back" cx="43" cy="43" r="40"></circle>
-    <circle class="front" cx="43" cy="43" r="40"></circle>
-    <circle class="new" cx="43" cy="43" r="40"></circle>
-  </svg>
-  <svg class="circle-middle" viewBox="0 0 60 60">
-    <circle class="back" cx="30" cy="30" r="27"></circle>
-    <circle class="front" cx="30" cy="30" r="27"></circle>
-  </svg>
-  <svg class="circle-inner" viewBox="0 0 34 34">
-    <circle class="back" cx="17" cy="17" r="14"></circle>
-    <circle class="front" cx="17" cy="17" r="14"></circle>
-  </svg>
-  <div class="text" data-text="soon"></div>
+<!-- Discord Support Section -->
+<section id="discord-support" class="py-16 bg-gray-100">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-12 fade-in">Support</h2>
+        <p class="text-lg text-gray-600 mb-6 fade-in" style="animation-delay: 0.2s;">Brauchen Sie Hilfe? Treten Sie unserem Discord bei!</p>
+        <a href="https://discord.gg/your-discord-link" target="_blank" class="inline-block text-blue-500 hover:text-blue-700 transition fade-in" style="animation-delay: 0.4s;">Unserem Discord beitreten</a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-8">
+    <div class="container mx-auto px-4 text-center">
+        <p>© 2025 Modern Shop. Alle Rechte vorbehalten.</p>
+    </div>
+</footer>
+
+<!-- Popup -->
+<div id="productPopup" class="popup-overlay">
+    <div id="popupContent" class="popup-content">
+        <span id="popupClose" class="popup-close">×</span>
+        <img id="popupImage" src="" alt="Produktbild" class="w-full h-48 object-cover rounded-lg mb-4">
+        <h3 id="popupTitle" class="text-xl font-semibold mb-2"></h3>
+        <p id="popupDescription" class="text-gray-600 mb-4"></p>
+        <p id="popupPrice" class="text-lg font-bold text-blue-600 mb-4"></p>
+    </div>
 </div>
 
+<script>
+    // Dark/Light Mode Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const body = document.body;
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+        body.classList.add('dark');
+        themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
+    } else {
+        themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
+    }
+
+    themeToggle.addEventListener('click', () => {
+        body.classList.toggle('dark');
+        if (body.classList.contains('dark')) {
+            localStorage.setItem('theme', 'dark');
+            themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
+        } else {
+            localStorage.setItem('theme', 'light');
+            themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
+        }
+    });
+
+    // Pop-up Funktionalität
+    const popup = document.getElementById('productPopup');
+    const popupContent = document.getElementById('popupContent');
+    const popupClose = document.getElementById('popupClose');
+    const popupImage = document.getElementById('popupImage');
+    const popupTitle = document.getElementById('popupTitle');
+    const popupDescription = document.getElementById('popupDescription');
+    const popupPrice = document.getElementById('popupPrice');
+
+    function openPopup(title, description, price, imageSrc) {
+        popupImage.src = imageSrc;
+        popupTitle.textContent = title;
+        popupDescription.textContent = description;
+        popupPrice.textContent = price;
+        popup.classList.add('active');
+        popupContent.classList.add('active');
+    }
+
+    popupClose.addEventListener('click', () => {
+        popup.classList.remove('active');
+        popupContent.classList.remove('active');
+    });
+
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            popup.classList.remove('active');
+            popupContent.classList.remove('active');
+        }
+    });
+
+    // Verhindern, dass der Klick auf den Warenkorb-Link das Pop-up schließt
+    document.querySelectorAll('.product-card a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.stopPropagation(); // Verhindert, dass der Klick auf den Link das Pop-up-Event auslöst
+        });
+    });
+</script>
 </body>
 </html>
